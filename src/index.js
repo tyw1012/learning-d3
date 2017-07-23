@@ -1,4 +1,3 @@
-import {TableBuilder} from './table-builder';
+import {renderDailyShowGuestTable} from './chapter2';
+renderDailyShowGuestTable();
 
-window.TableBuilder = TableBuilder;
-window.d3 = require('d3');
