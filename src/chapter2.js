@@ -4,23 +4,40 @@ import {BasicChart}	from './basic-chart';
 let d3 = require('d3');
 
 export default function(){
-	let svg = new BasicChart().chart;
-	svg.append('text').text('A picture!').attr({x: 10, y: 150, 'text-anchor' : 'start'});
-	svg.append('line').attr({x1: 10, y1: 10, x2: 100, y2:100, stroke:'blue',
-								'stroke-width': 3});
-	svg.append('rect').attr({x:200, y: 50, width: 300, height: 400});
-	svg.select('rect').attr({stroke: 'green', 'stroke-width': 0.5, fill: 'white',
-								rx: 40, ry: 40});
-	svg.append('circle').attr({cx: 350, cy: 250, r: 100, fill: 'green', 'fill-opacity': 0.5,
-								stroke: 'steelblue', 'stroke-width':2});
-	svg.append('ellipse').attr({cx: 350, cy: 250, rx: 150, ry: 70, fill: 'green', 'fill-opacity':0.3,
-								stroke: 'steelblule', 'stroke-width':0.7});
-	svg.append('ellipse').attr({cx:350, cy:250, rx: 20, ry: 70});
-	svg.selectAll('ellipse, circle').attr('transform', `translate(150,0) scale(1.2) rotate(-45, ${350/1.2}, ${250/1.2}) skewY(20)`);
-	svg.append('path').attr({d: 'M 100 100 L 300 100 L 200 300 z', stroke:'black', 'stroke-width':2, 
-								fill: 'red', 'fill-opacity': 0.7});
-	}
+	let chart = new BasicChart();
+	let svg = chart.svg;
 
+	let sine = d3.range(0,10).map((k) =>[0.5*k*Math.PI, Math.sin(0.5*k*Math.PI)]);
+
+	let x = d3.scale.linear().range([0, chart.width/2 -(chart.margin.left + chart.margin.right)])
+			.domain(d3.extent(sine, (d) => d[0]));
+	let y = d3.scale.linear().range([chart.height/2 - (chart.margin.top + chart.margin.bottom), 0])
+			.domain([-1, 1]);
+
+	let line = d3.svg.line().x((d)=>x(d[0])).y((d)=>y(d[1]));
+
+	let g = svg.append('g');
+	g.append('path').datum(sine).attr('d',line).attr({stroke:'steelblue', 'stroke-width':2, fill:'none'});
+
+	g.append('path').datum(sine).attr('d',line.interpolate('step-before')).attr({stroke:'black', 'stroke-width':1, fill:'none'});
+
+	let g2 = svg.append('g').attr('transform', `translate(
+
+		${(chart.width/2 + (chart.margin.left + chart.margin.right))} , ${chart.margin.top})`);
+	let area = d3.svg.area().x((d) => x(d[0])).y0(chart.height/2).y1((d)=>y(d[1])).interpolate('basis');
+
+	g2.append('path').datum(sine).attr('d',area).attr({fill: 'steelblue', 'fill-opacity': 0.4});
+
+	
+	g2.append('path').datum(sine).attr('d', line.interpolate('basis')).attr({stroke: 'steelblue', 'stroke-width': 2, fill: 'none'});
+
+	let arc = d3.svg.arc();
+	let g3 = svg.append('g').attr('transform', 'translate(' + (chart.margin.left+chart.margin.right)
+									+ ',' + (chart.height/2 + (chart.margin.top+chart.margin.bottom))+')');
+	g3.append('path').attr('d', arc({outerRadius : 100, innerRadius: 50, startAngle: -Math.PI*0.25, endAngle: Math.PI*0.25}))
+						.attr('tranform', 'translate(150,150)').attr('fill', 'lightslategray');
+
+}
 export function renderDailyShowGuestTable(){
 	let url = 'http://cdn.rawgit.com/fivethirtyeight/data/master/daily-show-guests/daily_show_guests.csv';
 	let table = new TableBuilder(url);	
