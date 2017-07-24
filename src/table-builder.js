@@ -17,13 +17,25 @@ export class TableBuilder{
 		}
 
 	redraw(){
+		let nested = d3.nest().key(d => d['Raw_Guest_List']).entries(this.data);
+		
+		this.data = nested.map(d => {
+			let earliest = d.values.sort((a,b)=>d3.ascending(a.YEAR, b.YEAR)).shift();
+			
+
+			return {
+				name:d.key,
+				category: earliest.Group,
+				'earliest appearnce':earliest.YEAR
+			}			
+		});
+
 		this.rows = this.tableBody.selectAll('tr').data(this.data);
 		this.rows.enter().append('tr');
 		this.rows.exit().remove();
-
-		this.rows.selectAll('td').data(d=>d3.values(d)).enter()
-		.append('td').text(d=>d);
-		this.tableBody.selectAll('tr').sort((a,b) => d3.ascending(a.Group, b.Group))
+		this.rows.selectAll('td').data(d=>d3.values(d))
+		.enter().append('td').text(d=>d);
 	}
+
 }	
 	
