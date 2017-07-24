@@ -1,3 +1,2 @@
-import {renderDailyShowGuestTable} from './chapter2';
-renderDailyShowGuestTable();
-
+import ch2 from './chapter2';
+ch2();
